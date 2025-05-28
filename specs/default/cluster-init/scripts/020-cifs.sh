@@ -2,6 +2,8 @@
 
 set -e
 
+exit 0
+
 # building the Redhat stock cifs kernel module after OFED
 # has been installed following
 # https://www.pixelbeat.org/docs/rebuild_kernel_module.html
