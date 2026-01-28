@@ -1,7 +1,7 @@
 #!/bin/sh
 set -e
 
-cat <<'EOF' > /etc/profile.d/data.sh
+cat <<'EOF' > /etc/profile.d/shared.sh
 pathmunge () {
 	case ":${PATH}:" in
 		*:"$1":*)
@@ -15,10 +15,11 @@ pathmunge () {
 	esac
 }
 
-pathmunge /data/appl/bin after
+[ -d /shared/appl/bin ] && pathmunge /shared/appl/bin after
+[ -d /data/appl/bin ] && pathmunge /data/appl/bin after
 unset -f pathmunge
 
-for i in /data/appl/profile.d/*.sh; do
+for i in /{shared,data}/appl/profile.d/*.sh ; do
 	if [ -r "$i" ]; then
 		if [ "$PS1" ]; then
 			. "$i"
@@ -29,8 +30,8 @@ for i in /data/appl/profile.d/*.sh; do
 done
 EOF
 
-cat <<'EOF' > /etc/profile.d/data.csh
-foreach p ( /data/appl/bin )
+cat <<'EOF' > /etc/profile.d/shared.csh
+foreach p ( /shared/appl/bin /data/appl/bin )
 	switch (":${PATH}:")
 	case "*:${p}:*":
 		breaksw
@@ -45,17 +46,15 @@ foreach p ( /data/appl/bin )
 end
 unset p
 
-if ( -d /etc/profile.d ) then
-	set nonomatch
-	foreach i ( /data/appl/profile.d/*.csh )
-		if ( -r "$i" ) then
-			if ($?prompt) then
-				source "$i"
-			else
-				source "$i" >&/dev/null
-			endif
+set nonomatch
+foreach i ( /shared/appl/profile.d/*.csh /data/appl/profile.d/*.csh )
+	if ( -r "$i" ) then
+		if ($?prompt) then
+			source "$i"
+		else
+			source "$i" >&/dev/null
 		endif
-	end
-	unset i nonomatch
-endif
+	endif
+end
+unset i nonomatch
 EOF
